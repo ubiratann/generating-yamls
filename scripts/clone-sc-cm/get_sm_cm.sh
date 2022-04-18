@@ -29,7 +29,7 @@ function download_yq(){
 function generate_confimaps_files(){
     local NAMESPACE=$1
 
-    local configmaps=$(kubectl get cm --no-headers -n $NAMESPACE| awk '{print $1}')
+    local configmaps=$(oc get cm --no-headers -n $NAMESPACE| awk '{print $1}')
     if [ ! -z "$configmaps" ];
     then
         mkdir -p ./${NAMESPACE}/configmaps
@@ -37,7 +37,7 @@ function generate_confimaps_files(){
         for configmap in $configmaps ; 
         do 
             echo "Current configmap: $configmap"
-            kubectl get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
+            oc get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
         done
     else
         red "No configmap found for namespace: $NAMESPACE"
@@ -49,14 +49,14 @@ function generate_confimaps_files(){
 function generate_secrets_files(){
     local NAMESPACE=$1
 
-    local secrets=$(kubectl get secrets --no-headers -n $NAMESPACE | awk '{print $1}')
+    local secrets=$(oc get secrets --no-headers -n $NAMESPACE | awk '{print $1}')
     if [ ! -z "$secrets" ];
     then
         mkdir -p ./${NAMESPACE}/secrets
         for secret in $secrets; 
         do 
             echo "Current secret: $secret"
-            kubectl get secrets/$secret -n $NAMESPACE -o yaml | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/secrets/$secret.yaml
+            oc get secrets/$secret -n $NAMESPACE -o yaml | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/secrets/$secret.yaml
         done
     else
         red "No secret found for namespace: $NAMESPACE"
