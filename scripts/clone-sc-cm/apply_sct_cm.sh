@@ -32,7 +32,7 @@ function apply_configmaps(){
         for configmap in ./$source_namespace/configmaps/*.yaml
         do
             echo "Current configmap ${configmap}"
-            oc apply -f $configmap -n $target_namespace
+            oc create -f $configmap -n $target_namespace
         done
     fi
 }
