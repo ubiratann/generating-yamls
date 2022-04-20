@@ -30,12 +30,14 @@ function generate_confimaps_files(){
     local configmaps=$(oc get cm --no-headers -n $NAMESPACE| awk '{print $1}')
     if [ ! -z "$configmaps" ];
     then
-        mkdir -p ./${NAMESPACE}/configmaps
-        
         for configmap in $configmaps ; 
         do 
-            echo "Current configmap: $configmap"
-            oc get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
+            if [ "$configmap" != "kube-root-ca.crt" ];
+            then
+                mkdir -p ./${NAMESPACE}/configmaps
+                echo "Current configmap: $configmap"
+                oc get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
+            fi
         done
     else
         red "No configmap found for namespace: $NAMESPACE"
@@ -80,4 +82,4 @@ function main(){
     done < "$namespace_file"
 }
 
-main $1
+main "$1"
