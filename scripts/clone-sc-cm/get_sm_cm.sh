@@ -1,18 +1,16 @@
 #!/bin/bash
 
-#file with namespaces
-namespace_file=$1
-
-#print text using green color
+# print text using green color
 function green(){
     echo -e "\033[32m$1\033[0m"
 }
 
+# print text using red color
 function red(){
     echo -e "\033[31m$1\033[m"
 }
 
-
+# download yq tool to update yaml files
 function download_yq(){
     if [ ! -f "/usr/local/bin/yq" ];
     then
@@ -25,7 +23,7 @@ function download_yq(){
     fi
 }
 
-
+# generating configmaps by namespace
 function generate_confimaps_files(){
     local NAMESPACE=$1
 
@@ -46,17 +44,18 @@ function generate_confimaps_files(){
 
 }
 
+#generating secrets by namespace
 function generate_secrets_files(){
     local NAMESPACE=$1
 
-    local secrets=$(oc get secrets --no-headers -n $NAMESPACE | awk '{print $1}')
+    local secrets=$(oc get secrets --no-headers -n $NAMESPACE | grep opaque | awk '{print $1}')
     if [ ! -z "$secrets" ];
     then
         mkdir -p ./${NAMESPACE}/secrets
         for secret in $secrets; 
         do 
             echo "Current secret: $secret"
-            oc get secrets/$secret -n $NAMESPACE -o yaml | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/secrets/$secret.yaml
+            oc get secrets/$secret -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/secrets/$secret.yaml
         done
     else
         red "No secret found for namespace: $NAMESPACE"
@@ -64,10 +63,13 @@ function generate_secrets_files(){
     secrets=""
 }
 
-
-
+#main
 function main(){
+    #file with namespaces
+    local namespace_file=$1
+    
     download_yq
+    
     echo -e "\n"
     while IFS= read -r line || [ -n "$line" ]
     do
@@ -78,4 +80,4 @@ function main(){
     done < "$namespace_file"
 }
 
-main
+main $1
