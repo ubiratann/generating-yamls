@@ -32,7 +32,7 @@ function generate_confimaps_files(){
     then
         for configmap in $configmaps ; 
         do 
-            if [ "$configmap" != "kube-root-ca.crt" && "$configmap" != "openshift-service-ca.crt"];
+            if [ "$configmap" != *.crt];
             then
                 mkdir -p ./${NAMESPACE}/configmaps
                 echo "Current configmap: $configmap"
