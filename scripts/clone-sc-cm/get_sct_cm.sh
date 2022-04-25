@@ -15,8 +15,8 @@ function download_yq(){
     if [ ! -f "/usr/local/bin/yq" ];
     then
         echo "Downloading yq binary"
-        sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-        sudo chmod a+x /usr/local/bin/yq
+        wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        chmod a+x /usr/local/bin/yq
         green "yq has been installed"
     else
         green "yq is already installed"
@@ -32,12 +32,14 @@ function generate_confimaps_files(){
     then
         for configmap in $configmaps ; 
         do 
-            if [ "$configmap" != "kube-root-ca.crt" ];
+            if [ "$configmap" != "kube-root-ca.crt" || "$configmap" != "openshift-service-ca.crt"];
             then
                 mkdir -p ./${NAMESPACE}/configmaps
                 echo "Current configmap: $configmap"
                 oc get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
             fi
+
+            if "$configmap" == "kube"
         done
     else
         red "No configmap found for namespace: $NAMESPACE"
