@@ -27,16 +27,16 @@ function download_yq(){
 function generate_confimaps_files(){
     local NAMESPACE=$1
 
-    local configmaps=$(oc get cm --no-headers -n $NAMESPACE| awk '{print $1}')
+    local configmaps=$(kubectl get cm --no-headers -n $NAMESPACE| awk '{print $1}')
     if [ ! -z "$configmaps" ];
     then
         for configmap in $configmaps ; 
         do 
-            if [ "$configmap" != *.crt];
+            if [[ "$configmap" != *.crt ]];
             then
                 mkdir -p ./${NAMESPACE}/configmaps
                 echo "Current configmap: $configmap"
-                oc get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
+                kubectl get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace, .metadata.annotations)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
             fi
         done
     else
@@ -50,14 +50,14 @@ function generate_confimaps_files(){
 function generate_secrets_files(){
     local NAMESPACE=$1
 
-    local secrets=$(oc get secrets --no-headers -n $NAMESPACE | grep opaque | awk '{print $1}')
+    local secrets=$(kubectl get secrets --no-headers -n $NAMESPACE | grep opaque | awk '{print $1}')
     if [ ! -z "$secrets" ];
     then
         mkdir -p ./${NAMESPACE}/secrets
         for secret in $secrets; 
         do 
             echo "Current secret: $secret"
-            oc get secrets/$secret -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/secrets/$secret.yaml
+            kubectl get secrets/$secret -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace, .metadata.annotations)" > ./${NAMESPACE}/secrets/$secret.yaml
         done
     else
         red "No secret found for namespace: $NAMESPACE"
