@@ -38,8 +38,6 @@ function generate_confimaps_files(){
                 echo "Current configmap: $configmap"
                 oc get cm/$configmap -o yaml -n $NAMESPACE | yq "del(.metadata.uid, .metadata.selfLink, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.namespace)" > ./${NAMESPACE}/configmaps/$configmap.yaml ; 
             fi
-
-            if "$configmap" == "kube"
         done
     else
         red "No configmap found for namespace: $NAMESPACE"
