@@ -7,7 +7,7 @@ function main(){
             pushd "$dir/secrets"
             for secret in *; do
                 secret_name=$(echo $secret | awk -F  "." '{print $1}')
-                echo -e " /kubeseal<$secret > ${TEMPLATES_PATH}/$secret_name/${secret_name}_sealed.yaml -o yaml"
+                kubeseal<$secret > ${TEMPLATES_PATH}/${secret_name}/${secret_name}.yaml -o yaml
             done
             popd
         else
